@@ -1,0 +1,353 @@
+﻿/* 文件说明：Vue 版本前端的全局样式文件。 */
+/* Vue 版本前端的全局样式文件。
+   当前项目主要用 frontend/standalone.html 直接打开页面；
+   如果用 npm run dev 启动 Vue，则这些样式会生效。 */
+
+:root {
+  /* 页面基础字体、文字颜色和背景色。 */
+  color: #1f2933;
+  background: #edf1f5;
+  font-family: "Inter", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #edf1f5;
+}
+
+button,
+input,
+select,
+textarea {
+  letter-spacing: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.login-panel {
+  /* 登录卡片，让登录框居中并带有边框和阴影。 */
+  width: min(420px, calc(100% - 32px));
+  margin: 12vh auto 0;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #d8dee7;
+  border-radius: 8px;
+  box-shadow: 0 18px 60px rgba(31, 41, 51, 0.12);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 8px;
+  background: #1f6feb;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: #17202a;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+label {
+  display: block;
+  width: 100%;
+  margin-bottom: 14px;
+  color: #52606d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-control {
+  min-height: 40px;
+  margin-top: 6px;
+  border-color: #cbd5e1;
+  border-radius: 6px;
+  color: #1f2933;
+}
+
+.form-control:focus {
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.14);
+}
+
+.workspace {
+  /* 登录成功后的主工作区外边距。 */
+  padding: 24px;
+}
+
+.topbar,
+.toolbar,
+.table-wrap,
+.editor-panel {
+  background: #ffffff;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.topbar span {
+  display: inline-block;
+  margin-top: 4px;
+  color: #607080;
+  font-size: 13px;
+}
+
+.toolbar {
+  /* 搜索框、状态下拉框和按钮所在的工具栏。 */
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.search-group {
+  position: relative;
+  flex: 1 1 340px;
+}
+
+.search-group svg {
+  position: absolute;
+  top: 17px;
+  left: 12px;
+  color: #607080;
+}
+
+.search-group .form-control {
+  padding-left: 38px;
+}
+
+.status-select {
+  width: 140px;
+}
+
+.icon-button {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #304154;
+}
+
+.icon-button:hover {
+  background: #eef6ff;
+  color: #1f6feb;
+}
+
+.icon-button.danger:hover {
+  background: #fff1f0;
+  color: #c62828;
+}
+
+.icon-text-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #273444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  border-color: #1f6feb;
+  background: #1f6feb;
+}
+
+.btn-primary:hover {
+  border-color: #195dbf;
+  background: #195dbf;
+}
+
+.feedback {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.feedback.error {
+  background: #fff1f0;
+  color: #a61b1b;
+}
+
+.feedback.success {
+  background: #edf9f0;
+  color: #1f7a3b;
+}
+
+.content-grid {
+  /* 列表和右侧编辑表单的两栏布局。 */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 16px;
+  align-items: start;
+}
+
+.table-wrap {
+  /* 表格过宽时允许横向滚动，避免页面被撑坏。 */
+  overflow: auto;
+}
+
+.table {
+  min-width: 900px;
+}
+
+.table th {
+  height: 44px;
+  border-top: 0;
+  color: #52606d;
+  font-size: 13px;
+  font-weight: 700;
+  background: #f7f9fc;
+}
+
+.table td {
+  height: 58px;
+  vertical-align: middle;
+  color: #273444;
+}
+
+.table small {
+  display: block;
+  margin-top: 3px;
+  color: #758392;
+}
+
+.empty-cell {
+  color: #758392;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  min-width: 48px;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef7ec;
+  color: #28723f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.action-col {
+  width: 110px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.editor-panel {
+  padding: 18px;
+}
+
+.editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.form-row,
+.metric-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.form-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.inline-actions {
+  margin: -2px 0 14px;
+}
+
+textarea.form-control {
+  min-height: 86px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+@media (max-width: 1050px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace {
+    padding: 12px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .status-select,
+  .toolbar .btn {
+    width: 100%;
+  }
+
+  .form-row,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

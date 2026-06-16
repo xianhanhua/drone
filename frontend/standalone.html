@@ -1,0 +1,614 @@
+﻿<!doctype html>
+<!-- 文件说明：当前实际使用的前端独立页面，包含登录、查询、新增、编辑、删除功能。 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>&#26080;&#20154;&#26426;&#20449;&#24687;&#31649;&#29702;</title>
+  <style>
+    /* 页面整体样式：控制字体、背景、按钮、表格、表单等外观。 */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #1f2933;
+      background: #edf1f5;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+    .hidden { display: none !important; }
+    /* 通用按钮样式，查询、新增、保存、删除等按钮都会复用。 */
+    .btn {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      color: #273444;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:hover { color: #1f6feb; background: #eef6ff; }
+    .btn.primary { color: #fff; border-color: #1f6feb; background: #1f6feb; }
+    .btn.primary:hover { background: #195dbf; }
+    .btn.danger:hover { color: #c62828; background: #fff1f0; }
+    .btn.icon { width: 38px; padding: 0; }
+    /* 登录面板样式。 */
+    .login-panel {
+      width: min(420px, calc(100% - 32px));
+      margin: 12vh auto 0;
+      padding: 32px;
+      background: #fff;
+      border: 1px solid #d8dee7;
+      border-radius: 8px;
+      box-shadow: 0 18px 60px rgba(31, 41, 51, 0.12);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+    /* 左上角 DM 标识。 */
+    .brand-mark {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border-radius: 8px;
+      color: #fff;
+      background: #1f6feb;
+      font-weight: 800;
+    }
+    h1, h2 { margin: 0; color: #17202a; }
+    h1 { font-size: 24px; }
+    h2 { font-size: 18px; }
+    label {
+      display: block;
+      margin-bottom: 14px;
+      color: #52606d;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    input, select, textarea {
+      width: 100%;
+      min-height: 40px;
+      margin-top: 6px;
+      padding: 8px 10px;
+      color: #1f2933;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      font: inherit;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #1f6feb;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.14);
+    }
+    /* 登录成功后的工作区。 */
+    .workspace { padding: 24px; }
+    .topbar, .toolbar, .table-wrap, .editor {
+      background: #fff;
+      border: 1px solid #d9e1ea;
+      border-radius: 8px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .topbar span { display: block; margin-top: 4px; color: #607080; font-size: 13px; }
+    /* 搜索和筛选工具栏。 */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .toolbar input { flex: 1; margin-top: 0; }
+    .toolbar select { width: 140px; margin-top: 0; }
+    .feedback {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .feedback.error { color: #a61b1b; background: #fff1f0; }
+    .feedback.success { color: #1f7a3b; background: #edf9f0; }
+    /* 列表和编辑表单的布局：默认列表占满宽度，打开编辑器后才分栏。 */
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .content-grid.editor-open { grid-template-columns: minmax(0, 1fr) 380px; }
+    /* 表格可以横向滚动，防止小屏幕下内容被挤坏。 */
+    .table-wrap { width: 100%; overflow: auto; }
+    table { width: 100%; min-width: 860px; border-collapse: collapse; }
+    th, td {
+      height: 54px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #e5eaf0;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th { color: #52606d; background: #f7f9fc; font-size: 13px; }
+    td small { display: block; margin-top: 3px; color: #758392; }
+    tbody tr:hover { background: #f8fbff; }
+    .empty { color: #758392; text-align: center; }
+    .status-badge {
+      display: inline-flex;
+      min-width: 48px;
+      justify-content: center;
+      padding: 5px 9px;
+      color: #28723f;
+      background: #eef7ec;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    th:last-child, td:last-child { width: 110px; }
+    .actions { display: flex; gap: 8px; white-space: nowrap; }
+    /* 右侧新增/编辑表单。 */
+    .editor { padding: 18px; }
+    .editor-head, .editor-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .editor-head { margin-bottom: 16px; }
+    .editor-actions { justify-content: flex-end; margin-top: 18px; }
+    .form-row, .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 1200px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .content-grid.editor-open { grid-template-columns: 1fr; }
+      .editor { order: -1; }
+    }
+    @media (max-width: 720px) {
+      .workspace { padding: 12px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .toolbar select, .toolbar .btn { width: 100%; }
+      .form-row, .metric-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- 登录区域：未登录时显示，登录成功后隐藏。 -->
+    <section id="loginPanel" class="login-panel">
+      <div class="brand">
+        <div class="brand-mark">DM</div>
+        <h1>&#26080;&#20154;&#26426;&#20449;&#24687;&#31649;&#29702;</h1>
+      </div>
+      <form id="loginForm">
+        <label>&#29992;&#25143;&#21517;<input id="username" value="admin" autocomplete="username"></label>
+        <label>&#23494;&#30721;<input id="password" value="admin123" type="password" autocomplete="current-password"></label>
+        <button class="btn primary" style="width:100%" type="submit">&#30331;&#24405;</button>
+        <button id="checkBackendBtn" class="btn" style="width:100%;margin-top:10px" type="button">&#26816;&#26597;&#21518;&#31471;&#36830;&#25509;</button>
+        <p id="loginMessage" class="feedback hidden"></p>
+      </form>
+    </section>
+
+    <!-- 主工作区：登录后显示，包含顶部栏、查询栏、表格和编辑表单。 -->
+    <section id="workspace" class="workspace hidden">
+      <header class="topbar">
+        <div>
+          <h1>&#26080;&#20154;&#26426;&#20449;&#24687;&#31649;&#29702;</h1>
+          <span id="userLabel"></span>
+        </div>
+        <button id="logoutBtn" class="btn icon" title="&#36864;&#20986;">X</button>
+      </header>
+
+      <section class="toolbar">
+        <!-- keyword 用来输入名称、型号、厂商、序列号关键词。 -->
+        <input id="keyword" placeholder="&#25628;&#32034;&#21517;&#31216;&#12289;&#22411;&#21495;&#12289;&#21378;&#21830;&#12289;&#24207;&#21015;&#21495;">
+        <select id="statusFilter">
+          <option value="">&#20840;&#37096;&#29366;&#24577;</option>
+          <option value="Pending">&#24453;&#26816;</option>
+          <option value="Active">&#22312;&#24441;</option>
+          <option value="Repair">&#32500;&#20462;</option>
+          <option value="Retired">&#36864;&#24441;</option>
+        </select>
+        <button id="searchBtn" class="btn">&#26597;&#35810;</button>
+        <button id="resetBtn" class="btn">&#37325;&#32622;</button>
+        <button id="newBtn" class="btn primary">&#26032;&#22686;</button>
+      </section>
+
+      <p id="message" class="feedback hidden"></p>
+
+      <section class="content-grid">
+        <!-- 无人机列表。表格数据由 JavaScript 调用后端接口后动态填充。 -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>&#21517;&#31216;</th>
+                <th>&#22411;&#21495;</th>
+                <th>&#31867;&#22411;</th>
+                <th>&#32493;&#33322;</th>
+                <th>&#36895;&#24230;</th>
+                <th>&#36733;&#37325;</th>
+                <th>&#29366;&#24577;</th>
+                <th>&#25805;&#20316;</th>
+              </tr>
+            </thead>
+            <tbody id="droneRows">
+              <tr><td class="empty" colspan="8">&#26242;&#26080;&#25968;&#25454;</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 新增/编辑表单。默认隐藏，点击新增或编辑时显示。 -->
+        <aside id="editor" class="editor hidden">
+          <div class="editor-head">
+            <h2 id="editorTitle">&#26032;&#22686;&#26080;&#20154;&#26426;</h2>
+            <button id="closeEditorBtn" class="btn icon" title="&#20851;&#38381;">X</button>
+          </div>
+          <form id="editorForm">
+            <label>&#21517;&#31216;<input id="name"></label>
+            <button id="aiBtn" class="btn" type="button">AI&#29983;&#25104;&#23646;&#24615;</button>
+            <div class="form-row">
+              <label>&#22411;&#21495;<input id="model"></label>
+              <label>&#21378;&#21830;<input id="manufacturer"></label>
+            </div>
+            <label>&#24207;&#21015;&#21495;<input id="serialNumber"></label>
+            <div class="form-row">
+              <label>&#31867;&#22411;<input id="droneType"></label>
+              <label>&#29366;&#24577;<select id="status"><option value="Pending">&#24453;&#26816;</option><option value="Active">&#22312;&#24441;</option><option value="Repair">&#32500;&#20462;</option><option value="Retired">&#36864;&#24441;</option></select></label>
+            </div>
+            <div class="metric-grid">
+              <label>&#32493;&#33322;(&#20998;&#38047;)<input id="maxFlightTimeMinutes" type="number"></label>
+              <label>&#36895;&#24230;(km/h)<input id="maxSpeedKmh" type="number"></label>
+              <label>&#39640;&#24230;(m)<input id="maxAltitudeMeters" type="number"></label>
+              <label>&#36733;&#37325;(kg)<input id="payloadCapacityKg" type="number" step="0.1"></label>
+              <label>&#30005;&#27744;(mAh)<input id="batteryCapacityMah" type="number"></label>
+            </div>
+            <label>AI&#30011;&#20687;<textarea id="aiProfile"></textarea></label>
+            <div class="editor-actions">
+              <button class="btn primary" type="submit">&#20445;&#23384;</button>
+              <button id="cancelBtn" class="btn" type="button">&#21462;&#28040;</button>
+            </div>
+          </form>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // 后端 API 根地址。后端端口是 8091，所以这里必须保持一致。
+    const API_BASE = 'http://localhost:8091/api';
+
+    // 登录成功后 token 存在浏览器 localStorage 里的 key。
+    const TOKEN_KEY = 'drone-management-auth-token';
+
+    // 页面状态：保存当前用户、无人机列表、当前是新增还是编辑。
+    const state = { user: null, drones: [], mode: 'create', editingId: null };
+
+    // 统一收集页面元素 id，后面通过 el.xxx 直接使用。
+    const ids = [
+      'loginPanel', 'workspace', 'loginForm', 'username', 'password', 'loginMessage',
+      'checkBackendBtn', 'userLabel', 'logoutBtn', 'keyword', 'statusFilter', 'searchBtn',
+      'resetBtn', 'newBtn', 'message', 'droneRows', 'editor', 'editorTitle', 'closeEditorBtn',
+      'editorForm', 'name', 'aiBtn', 'model', 'manufacturer', 'serialNumber', 'droneType',
+      'status', 'maxFlightTimeMinutes', 'maxSpeedKmh', 'maxAltitudeMeters',
+      'payloadCapacityKg', 'batteryCapacityMah', 'aiProfile', 'cancelBtn'
+    ];
+    const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+    // 登录表单提交事件：把用户名和密码发给后端 /auth/login。
+    el.loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      await run(async () => {
+        const result = await request('/auth/login', {
+          method: 'POST',
+          body: { username: el.username.value.trim(), password: el.password.value }
+        });
+        if (result.data && result.data.token) localStorage.setItem(TOKEN_KEY, result.data.token);
+        state.user = result.data || {};
+        showWorkspace();
+        await loadDrones();
+      }, '\u767b\u5f55\u6210\u529f');
+    });
+
+    // 检查后端连接是否正常。
+    el.checkBackendBtn.addEventListener('click', async () => {
+      await run(async () => { await request('/auth/me'); }, '\u540e\u7aef\u8fde\u63a5\u6b63\u5e38');
+    });
+
+    // 退出登录：清除 token，回到登录页面。
+    el.logoutBtn.addEventListener('click', async () => {
+      await request('/auth/logout', { method: 'POST' }).catch(() => null);
+      localStorage.removeItem(TOKEN_KEY);
+      state.user = null;
+      el.workspace.classList.add('hidden');
+      el.loginPanel.classList.remove('hidden');
+    });
+    el.searchBtn.addEventListener('click', loadDrones);
+    el.statusFilter.addEventListener('change', loadDrones);
+    el.resetBtn.addEventListener('click', resetFilters);
+    el.keyword.addEventListener('keyup', event => { if (event.key === 'Enter') loadDrones(); });
+    el.newBtn.addEventListener('click', openCreate);
+    el.closeEditorBtn.addEventListener('click', closeEditor);
+    el.cancelBtn.addEventListener('click', closeEditor);
+    el.aiBtn.addEventListener('click', generatePreview);
+    el.editorForm.addEventListener('submit', saveDrone);
+
+    // 页面刚打开时先检查是否已经登录过。
+    checkMe();
+
+    async function checkMe() {
+      // 如果本地已有 token，并且后端认可，就直接进入主页面。
+      try {
+        const result = await request('/auth/me');
+        if (result.data && result.data.authenticated) {
+          state.user = result.data;
+          showWorkspace();
+          await loadDrones();
+        }
+      } catch (error) {
+        el.loginPanel.classList.remove('hidden');
+      }
+    }
+
+    function showWorkspace() {
+      // 隐藏登录框，显示无人机管理主界面。
+      el.loginPanel.classList.add('hidden');
+      el.workspace.classList.remove('hidden');
+      el.userLabel.textContent = (state.user && state.user.username) || 'admin';
+    }
+
+    async function loadDrones() {
+      // 根据搜索框和状态下拉框拼接查询参数，然后请求后端列表接口。
+      await run(async () => {
+        const params = new URLSearchParams();
+        if (el.keyword.value.trim()) params.set('keyword', el.keyword.value.trim());
+        if (el.statusFilter.value) params.set('status', el.statusFilter.value);
+        const result = await request('/drones?' + params.toString());
+        state.drones = result.data || [];
+        renderRows();
+      });
+    }
+
+    function renderRows() {
+      // 把后端返回的无人机数组渲染成表格行。
+      if (!state.drones.length) {
+        el.droneRows.innerHTML = '<tr><td class="empty" colspan="8">&#26242;&#26080;&#25968;&#25454;</td></tr>';
+        return;
+      }
+      el.droneRows.innerHTML = state.drones.map(drone => `
+        <tr>
+          <td><strong>${escapeHtml(drone.name)}</strong><small>${escapeHtml(drone.serialNumber)}</small></td>
+          <td>${escapeHtml(drone.model)}</td>
+          <td>${escapeHtml(displayType(drone.droneType))}</td>
+          <td>${drone.maxFlightTimeMinutes} \u5206\u949f</td>
+          <td>${drone.maxSpeedKmh} km/h</td>
+          <td>${drone.payloadCapacityKg} kg</td>
+          <td><span class="status-badge">${escapeHtml(displayStatus(drone.status))}</span></td>
+          <td><div class="actions">
+            <button class="btn icon" title="\u7f16\u8f91" onclick="editDrone(${drone.id})">\u7f16</button>
+            <button class="btn icon danger" title="\u5220\u9664" onclick="deleteDrone(${drone.id})">\u5220</button>
+          </div></td>
+        </tr>
+      `).join('');
+    }
+
+    window.editDrone = id => {
+      // 点击“编辑”时，根据 id 找到这一行数据并填入表单。
+      const drone = state.drones.find(item => item.id === id);
+      if (!drone) return;
+      state.mode = 'edit';
+      state.editingId = id;
+      fillForm(drone);
+      setReadonly(false);
+      el.aiBtn.classList.add('hidden');
+      el.editorTitle.textContent = '\u4fee\u6539\u65e0\u4eba\u673a';
+      showEditor();
+    };
+
+    window.deleteDrone = async id => {
+      // 删除前先弹确认框，防止误删。
+      const drone = state.drones.find(item => item.id === id);
+      if (!window.confirm('\u786e\u8ba4\u5220\u9664 ' + (drone ? drone.name : '\u8be5\u65e0\u4eba\u673a') + '\uff1f')) return;
+      await run(async () => {
+        await request('/drones/' + id, { method: 'DELETE' });
+        await loadDrones();
+      }, '\u5220\u9664\u6210\u529f');
+    };
+
+    function openCreate() {
+      // 打开新增表单，并把表单恢复成默认状态。
+      state.mode = 'create';
+      state.editingId = null;
+      fillForm({ status: 'Pending' });
+      setReadonly(true);
+      el.aiBtn.classList.remove('hidden');
+      el.editorTitle.textContent = '\u65b0\u589e\u65e0\u4eba\u673a';
+      showEditor();
+      hideMessage();
+    }
+
+    function showEditor() {
+      // 显示右侧编辑器，并让外层布局切换成“表格 + 表单”模式。
+      el.editor.classList.remove('hidden');
+      el.editor.parentElement.classList.add('editor-open');
+    }
+
+    function closeEditor() {
+      // 关闭编辑器后，表格重新占满整行。
+      el.editor.classList.add('hidden');
+      el.editor.parentElement.classList.remove('editor-open');
+    }
+
+    function resetFilters() {
+      // 清空查询条件后重新加载列表。
+      el.keyword.value = '';
+      el.statusFilter.value = '';
+      loadDrones();
+    }
+
+    async function generatePreview() {
+      // 根据名称向后端请求 AI 生成属性，并填入表单。
+      if (!el.name.value.trim()) {
+        showMessage('\u8bf7\u5148\u586b\u5199\u540d\u79f0', 'error');
+        return;
+      }
+      await run(async () => {
+        const result = await request('/drones/ai-preview?name=' + encodeURIComponent(el.name.value.trim()));
+        fillForm(result.data);
+      }, 'AI\u5c5e\u6027\u5df2\u751f\u6210');
+    }
+
+    async function saveDrone(event) {
+      // 保存表单：新增走 POST，编辑走 PUT。
+      event.preventDefault();
+      await run(async () => {
+        if (state.mode === 'create') {
+          await request('/drones', { method: 'POST', body: { name: el.name.value.trim(), status: el.status.value } });
+        } else {
+          await request('/drones/' + state.editingId, { method: 'PUT', body: readForm() });
+        }
+        closeEditor();
+        await loadDrones();
+      }, '\u4fdd\u5b58\u6210\u529f');
+    }
+
+    function fillForm(data) {
+      // 把一个无人机对象填入表单。新增预览、编辑都会用到。
+      const values = data || {};
+      ['name','model','manufacturer','serialNumber','droneType','status','maxFlightTimeMinutes',
+       'maxSpeedKmh','maxAltitudeMeters','payloadCapacityKg','batteryCapacityMah','aiProfile']
+        .forEach(id => { el[id].value = values[id] == null ? '' : values[id]; });
+      if (!el.status.value) el.status.value = 'Pending';
+    }
+
+    function readForm() {
+      // 从表单中读取用户填写的内容，组装成要提交给后端的对象。
+      return {
+        name: el.name.value.trim(),
+        model: el.model.value.trim(),
+        manufacturer: el.manufacturer.value.trim(),
+        serialNumber: el.serialNumber.value.trim(),
+        droneType: el.droneType.value.trim(),
+        maxFlightTimeMinutes: Number(el.maxFlightTimeMinutes.value),
+        maxSpeedKmh: Number(el.maxSpeedKmh.value),
+        maxAltitudeMeters: Number(el.maxAltitudeMeters.value),
+        payloadCapacityKg: Number(el.payloadCapacityKg.value),
+        batteryCapacityMah: Number(el.batteryCapacityMah.value),
+        status: el.status.value,
+        aiProfile: el.aiProfile.value.trim()
+      };
+    }
+
+    function setReadonly(readonly) {
+      // 新增模式下 AI 自动生成的字段只读；编辑模式下允许修改。
+      ['model','manufacturer','serialNumber','droneType','maxFlightTimeMinutes','maxSpeedKmh',
+       'maxAltitudeMeters','payloadCapacityKg','batteryCapacityMah','aiProfile']
+        .forEach(id => { el[id].readOnly = readonly; });
+    }
+
+    async function run(task, successMessage) {
+      // 统一处理异步操作的成功和失败提示，避免每个按钮都重复写 try/catch。
+      hideMessage();
+      try {
+        await task();
+        if (successMessage) showMessage(successMessage, 'success');
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    }
+
+    async function request(path, options = {}) {
+      // 统一封装 fetch，请求后端接口都走这个方法。
+      let response;
+      try {
+        response = await fetch(API_BASE + path, {
+          method: options.method || 'GET',
+          credentials: 'include',
+          headers: buildHeaders(),
+          body: options.body ? JSON.stringify(options.body) : undefined
+        });
+      } catch (error) {
+        throw new Error('\u65e0\u6cd5\u8fde\u63a5\u540e\u7aef\u670d\u52a1\uff0c\u8bf7\u5148\u542f\u52a8 Spring Boot\uff0c\u5e76\u786e\u8ba4\u5730\u5740\u4e3a http://localhost:8091');
+      }
+      const data = await response.json().catch(() => null);
+      if (!response.ok || (data && data.success === false)) {
+        throw new Error((data && translateMessage(data.message)) || '\u8bf7\u6c42\u5931\u8d25');
+      }
+      return data;
+    }
+
+    function buildHeaders() {
+      // 每次请求都带上 JSON 类型；如果已登录，还要带上 X-Auth-Token。
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) headers['X-Auth-Token'] = token;
+      return headers;
+    }
+
+    function displayStatus(value) {
+      // 把后端保存的英文状态转换成中文显示。
+      const map = {
+        Pending: '\u5f85\u68c0',
+        Active: '\u5728\u5f79',
+        Repair: '\u7ef4\u4fee',
+        Retired: '\u9000\u5f79',
+        '\u5f85\u68c0': '\u5f85\u68c0',
+        '\u5728\u5f79': '\u5728\u5f79',
+        '\u7ef4\u4fee': '\u7ef4\u4fee',
+        '\u9000\u5f79': '\u9000\u5f79'
+      };
+      return map[value] || value || '';
+    }
+
+    function displayType(value) {
+      // 把后端保存的英文类型转换成中文显示。
+      const map = {
+        Inspection: '\u5de1\u68c0\u578b',
+        Mapping: '\u6d4b\u7ed8\u578b',
+        Security: '\u5b89\u9632\u578b',
+        Logistics: '\u7269\u6d41\u578b',
+        Agriculture: '\u519c\u4e1a\u578b'
+      };
+      return map[value] || value || '';
+    }
+
+    function translateMessage(value) {
+      // 把后端英文错误提示转换成中文，方便页面用户理解。
+      if (value === 'Please login first') return '\u8bf7\u5148\u767b\u5f55';
+      if (value === 'Request failed') return '\u8bf7\u6c42\u5931\u8d25';
+      return value;
+    }
+
+    function showMessage(text, type) {
+      // 根据当前页面状态，把提示显示在登录页或主工作区。
+      const target = el.workspace.classList.contains('hidden') ? el.loginMessage : el.message;
+      target.textContent = text;
+      target.className = 'feedback ' + type;
+      target.classList.remove('hidden');
+    }
+    function hideMessage() {
+      // 隐藏登录页和主页面上的提示信息。
+      el.message.classList.add('hidden');
+      el.loginMessage.classList.add('hidden');
+    }
+    function escapeHtml(value) {
+      // 防止数据里带有 <script> 这类内容时影响页面结构。
+      return String(value == null ? '' : value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+</body>
+</html>
