@@ -1,0 +1,88 @@
+﻿# 文件说明：后端总配置文件，配置端口、数据库、MyBatis、跨域和登录账号。
+# 后端总配置文件。
+# 这里配置端口、数据库、MyBatis、跨域地址、登录账号和数据库切换方式。
+# 默认使用 SQLite；如果以后改成 MySQL，需要把 spring.profiles.active 改成 mysql。
+server:
+  port: 8091
+  servlet:
+    context-path: /
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.apache.shiro.spring.boot.autoconfigure.ShiroBeanAutoConfiguration
+      - org.apache.shiro.spring.boot.autoconfigure.ShiroAutoConfiguration
+      - org.apache.shiro.spring.boot.autoconfigure.ShiroAnnotationProcessorAutoConfiguration
+      - org.apache.shiro.spring.config.web.autoconfigure.ShiroWebAutoConfiguration
+      - org.apache.shiro.spring.config.web.autoconfigure.ShiroWebFilterConfiguration
+  profiles:
+    active: sqlite
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 2
+      min-idle: 2
+      max-active: 10
+      max-wait: 60000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.drone.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+app:
+  database:
+    type: sqlite
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+      - "null"
+  security:
+    username: admin
+    password: admin123
+    api-token: drone-management-local-token
+
+---
+spring:
+  profiles: sqlite
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:./data/drone-management.db
+    username:
+    password:
+    druid:
+      driver-class-name: org.sqlite.JDBC
+      url: jdbc:sqlite:./data/drone-management.db
+      username:
+      password:
+app:
+  database:
+    type: sqlite
+
+---
+spring:
+  profiles: mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/drone_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: root
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/drone_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+      username: root
+      password: root
+app:
+  database:
+    type: mysql

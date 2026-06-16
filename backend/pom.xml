@@ -1,0 +1,100 @@
+﻿<!-- 文件说明：后端 Maven 配置文件，用来管理依赖、版本和打包启动插件。 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot 父工程，统一管理 Spring Boot 相关依赖版本。 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.13.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <!-- 项目的 Maven 坐标，相当于项目的身份信息。 -->
+    <groupId>com.example</groupId>
+    <artifactId>drone-management-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>drone-management-backend</name>
+    <description>Java EE 8 Servlet based drone information management API</description>
+
+    <!-- 统一管理第三方库版本，后面依赖中可以用 ${变量名} 引用。 -->
+    <properties>
+        <java.version>1.8</java.version>
+        <mybatis.spring.boot.version>2.1.4</mybatis.spring.boot.version>
+        <shiro.version>1.7.1</shiro.version>
+        <druid.version>1.2.8</druid.version>
+        <sqlite.jdbc.version>3.36.0.3</sqlite.jdbc.version>
+        <mysql.version>8.0.33</mysql.version>
+    </properties>
+
+    <!-- 后端项目需要用到的依赖。 -->
+    <dependencies>
+        <!-- Spring MVC / 内置 Tomcat，用来提供 HTTP API。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 参数校验，例如 @NotBlank、@Min、@Max。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- MyBatis，用来执行 SQL 并映射 Java 对象。 -->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${mybatis.spring.boot.version}</version>
+        </dependency>
+        <!-- Shiro，用来做登录认证和接口保护。 -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring-boot-web-starter</artifactId>
+            <version>${shiro.version}</version>
+        </dependency>
+        <!-- Druid 数据库连接池。 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
+        <!-- SQLite 驱动，默认数据库使用它。 -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>${sqlite.jdbc.version}</version>
+        </dependency>
+        <!-- MySQL 驱动，切换 MySQL 时使用。 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- 测试依赖。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven 插件，用来启动和打包后端项目。 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

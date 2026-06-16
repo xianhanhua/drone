@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!-- 文件说明：MyBatis SQL 映射文件，保存无人机查询、新增、修改、删除的 SQL。 -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.drone.mapper.DroneMapper">
+
+    <!-- resultMap 负责把数据库字段映射成 Java 对象字段。 -->
+    <resultMap id="DroneResultMap" type="com.example.drone.domain.Drone">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="model" property="model"/>
+        <result column="manufacturer" property="manufacturer"/>
+        <result column="serial_number" property="serialNumber"/>
+        <result column="drone_type" property="droneType"/>
+        <result column="max_flight_time_minutes" property="maxFlightTimeMinutes"/>
+        <result column="max_speed_kmh" property="maxSpeedKmh"/>
+        <result column="max_altitude_meters" property="maxAltitudeMeters"/>
+        <result column="payload_capacity_kg" property="payloadCapacityKg"/>
+        <result column="battery_capacity_mah" property="batteryCapacityMah"/>
+        <result column="status" property="status"/>
+        <result column="ai_profile" property="aiProfile"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- BaseColumns 是公共字段列表，多个查询共用，避免重复写字段名。 -->
+    <sql id="BaseColumns">
+        id, name, model, manufacturer, serial_number, drone_type,
+        max_flight_time_minutes, max_speed_kmh, max_altitude_meters,
+        payload_capacity_kg, battery_capacity_mah, status, ai_profile,
+        created_at, updated_at
+    </sql>
+
+    <!-- 查询无人机列表：支持关键词模糊查询和状态筛选。 -->
+    <select id="selectList" resultMap="DroneResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM drones
+        <where>
+            <if test="query != null and query.keywordLike != null">
+                AND (
+                    LOWER(name) LIKE #{query.keywordLike}
+                    OR LOWER(model) LIKE #{query.keywordLike}
+                    OR LOWER(manufacturer) LIKE #{query.keywordLike}
+                    OR LOWER(serial_number) LIKE #{query.keywordLike}
+                )
+            </if>
+            <if test="query != null and query.status != null">
+                AND status = #{query.status}
+            </if>
+        </where>
+        ORDER BY updated_at DESC, id DESC
+    </select>
+
+    <!-- 根据 id 查询单架无人机详情。 -->
+    <select id="selectById" resultMap="DroneResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM drones
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增无人机，useGeneratedKeys 会把数据库生成的 id 回填给 Java 对象。 -->
+    <insert id="insert" parameterType="com.example.drone.domain.Drone"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO drones (
+            name, model, manufacturer, serial_number, drone_type,
+            max_flight_time_minutes, max_speed_kmh, max_altitude_meters,
+            payload_capacity_kg, battery_capacity_mah, status, ai_profile,
+            created_at, updated_at
+        ) VALUES (
+            #{name}, #{model}, #{manufacturer}, #{serialNumber}, #{droneType},
+            #{maxFlightTimeMinutes}, #{maxSpeedKmh}, #{maxAltitudeMeters},
+            #{payloadCapacityKg}, #{batteryCapacityMah}, #{status}, #{aiProfile},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 修改无人机信息，只根据 id 更新对应一条记录。 -->
+    <update id="update" parameterType="com.example.drone.domain.Drone">
+        UPDATE drones
+        SET name = #{name},
+            model = #{model},
+            manufacturer = #{manufacturer},
+            serial_number = #{serialNumber},
+            drone_type = #{droneType},
+            max_flight_time_minutes = #{maxFlightTimeMinutes},
+            max_speed_kmh = #{maxSpeedKmh},
+            max_altitude_meters = #{maxAltitudeMeters},
+            payload_capacity_kg = #{payloadCapacityKg},
+            battery_capacity_mah = #{batteryCapacityMah},
+            status = #{status},
+            ai_profile = #{aiProfile},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据 id 删除无人机。 -->
+    <delete id="deleteById">
+        DELETE FROM drones WHERE id = #{id}
+    </delete>
+
+    <!-- 检查序列号是否重复，excludeId 用于修改时排除当前记录。 -->
+    <select id="countBySerialNumber" resultType="int">
+        SELECT COUNT(1)
+        FROM drones
+        WHERE serial_number = #{serialNumber}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+</mapper>
